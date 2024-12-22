@@ -1,4 +1,4 @@
-# animation-based-tetris
+# [animation-based-tetris](https://github.com/UniBreakfast/animation-based-tetris)
 
 ## Tetris with smooth animations
 
