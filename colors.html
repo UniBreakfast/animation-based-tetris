@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 16px;
+            min-height: 100vh;
+            background: #f0f0f0;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .container {
+            max-width: min(100%, 600px);
+            margin: 0 auto;
+        }
+        .color-layer {
+            height: 36px;
+            margin-bottom: 2px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            cursor: grab;
+            user-select: none;
+            transition: box-shadow 0.2s;
+        }
+        .color-layer.dragging {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1000;
+            opacity: 0.9;
+        }
+        .remove-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 16px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .remove-btn:hover {
+            opacity: 1;
+        }
+        .copy-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .copy-btn:hover {
+            transform: translateY(-2px);
+        }
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+<div class="container"></div>
+<button class="copy-btn">Copy Color Order</button>
+
+<script>
+    const colors = ['AliceBlue', 'AntiqueWhite', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque', 'Black', 'BlanchedAlmond', 
+    'Blue', 'BlueViolet', 'Brown', 'BurlyWood', 'CadetBlue', 'Chartreuse', 'Chocolate', 'Coral', 'CornflowerBlue', 
+    'Cornsilk', 'Crimson', 'Cyan', 'DarkBlue', 'DarkCyan', 'DarkGoldenRod', 'DarkGray', 'DarkGreen', 'DarkKhaki', 
+    'DarkMagenta', 'DarkOliveGreen', 'DarkOrange', 'DarkOrchid', 'DarkRed', 'DarkSalmon', 'DarkSeaGreen', 'DarkSlateBlue', 
+    'DarkSlateGray', 'DarkTurquoise', 'DarkViolet', 'DeepPink', 'DeepSkyBlue', 'DimGray', 'DodgerBlue', 'FireBrick', 
+    'FloralWhite', 'ForestGreen', 'Fuchsia', 'Gainsboro', 'GhostWhite', 'Gold', 'GoldenRod', 'Gray', 'Green', 'GreenYellow', 
+    'HoneyDew', 'HotPink', 'IndianRed', 'Indigo', 'Ivory', 'Khaki', 'Lavender', 'LavenderBlush', 'LawnGreen', 'LemonChiffon', 
+    'LightBlue', 'LightCoral', 'LightCyan', 'LightGoldenRodYellow', 'LightGray', 'LightGreen', 'LightPink', 'LightSalmon', 
+    'LightSeaGreen', 'LightSkyBlue', 'LightSlateGray', 'LightSteelBlue', 'LightYellow', 'Lime', 'LimeGreen', 'Linen', 
+    'Magenta', 'Maroon', 'MediumAquaMarine', 'MediumBlue', 'MediumOrchid', 'MediumPurple', 'MediumSeaGreen', 'MediumSlateBlue', 
+    'MediumSpringGreen', 'MediumTurquoise', 'MediumVioletRed', 'MidnightBlue', 'MintCream', 'MistyRose', 'Moccasin', 
+    'NavajoWhite', 'Navy', 'OldLace', 'Olive', 'OliveDrab', 'Orange', 'OrangeRed', 'Orchid', 'PaleGoldenRod', 'PaleGreen', 
+    'PaleTurquoise', 'PaleVioletRed', 'PapayaWhip', 'PeachPuff', 'Peru', 'Pink', 'Plum', 'PowderBlue', 'Purple', 'RebeccaPurple',
+    'Red', 'RosyBrown', 'RoyalBlue', 'SaddleBrown', 'Salmon', 'SandyBrown', 'SeaGreen', 'SeaShell', 'Sienna', 'Silver', 
+    'SkyBlue', 'SlateBlue', 'SlateGray', 'Snow', 'SpringGreen', 'SteelBlue', 'Tan', 'Teal', 'Thistle', 'Tomato', 'Turquoise', 
+    'Violet', 'Wheat', 'White', 'WhiteSmoke', 'Yellow', 'YellowGreen'];
+
+    function getLuminance(r, g, b) {
+        const [rs, gs, bs] = [r, g, b].map(c => {
+            c = c / 255;
+            return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+    }
+
+    function getRGB(colorName) {
+        const temp = document.createElement('div');
+        temp.style.color = colorName;
+        document.body.appendChild(temp);
+        const rgb = window.getComputedStyle(temp).color;
+        document.body.removeChild(temp);
+        return rgb.match(/\d+/g).map(Number);
+    }
+
+    let draggedElement = null;
+
+    function createColorLayer(color) {
+        const layer = document.createElement('div');
+        layer.className = 'color-layer';
+        layer.style.backgroundColor = color;
+        layer.setAttribute('data-color', color);
+        
+        const [r, g, b] = getRGB(color);
+        const luminance = getLuminance(r, g, b);
+        layer.style.color = luminance > 0.5 ? '#000' : '#fff';
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = color;
+        layer.appendChild(nameSpan);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = '❌';
+        removeBtn.onclick = (e) => {
+            e.stopPropagation();
+            layer.remove();
+        };
+        layer.appendChild(removeBtn);
+
+        // Drag and drop handlers
+        layer.draggable = true;
+        layer.ondragstart = (e) => {
+            draggedElement = layer;
+            layer.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        };
+        layer.ondragend = () => {
+            layer.classList.remove('dragging');
+            draggedElement = null;
+        };
+        layer.ondragover = (e) => {
+            e.preventDefault();
+            if (draggedElement && layer !== draggedElement) {
+                const rect = layer.getBoundingClientRect();
+                const midpoint = rect.top + rect.height / 2;
+                if (e.clientY < midpoint) {
+                    layer.parentNode.insertBefore(draggedElement, layer);
+                } else {
+                    layer.parentNode.insertBefore(draggedElement, layer.nextSibling);
+                }
+            }
+        };
+
+        return layer;
+    }
+
+    // Initialize color layers
+    colors.forEach(color => {
+        const layer = createColorLayer(color);
+        document.querySelector('.container').appendChild(layer);
+    });
+
+    // Copy button functionality
+    document.querySelector('.copy-btn').onclick = () => {
+        const layers = document.querySelectorAll('.color-layer');
+        const colorOrder = {};
+        layers.forEach((layer, index) => {
+            colorOrder[index + 1] = layer.getAttribute('data-color');
+        });
+        
+        navigator.clipboard.writeText(JSON.stringify(colorOrder, null, 2))
+            .then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = 'Copy Color Order';
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy to clipboard');
+            });
+    };
+</script>
+</body>
+</html>
