@@ -25,11 +25,16 @@ const state = {
   ], // but with rowCount and columnCount
 };
 
-function prepareState(config, tetris) {
+let tetris;
+
+function prepareState(config, tetrisRef) {
+  tetris = tetrisRef;
+
+  const { getSomeOmino, chooseDropPosition } = tetris;
   const { rowCount, columnCount } = config;
-  const omino = tetris.getSomeOmino();
+  const omino = getSomeOmino();
   const { row, column } = chooseDropPosition(omino, columnCount);
-  const next = tetris.getSomeOmino();
+  const next = getSomeOmino();
   const grid = makeMatrix(rowCount, columnCount);
   
   return Object.assign(state, { row, column, omino, next, grid });

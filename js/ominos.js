@@ -12,12 +12,12 @@ const colorDict = {
   line: '#777',
 
   1: 'cyan',
-  2: 'yellow',
-  3: 'magenta',
-  4: 'blue',
-  5: 'orange',
-  6: 'lime',
-  7: 'red',
+  2: 'magenta',
+  3: 'blue',
+  4: 'orange',
+  5: 'lime',
+  6: 'red',
+  7: 'yellow',
 }
 
 const colors = [
