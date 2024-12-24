@@ -39,10 +39,10 @@ function clear() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function drawOmino(omino, row, column, shiftX, shiftY, turn) {
+function drawOmino(omino, row, column, rowShift, columnShift, turn) {
   const { blockSize, lineWidth, colorDict } = config;
-  const x = column * blockSize + (shiftX || 0);
-  const y = row * blockSize + (shiftY || 0);
+  const x = (column + (columnShift || 0)) * blockSize;
+  const y = (row + (rowShift || 0)) * blockSize;
   const rotationAngle = turn * Math.PI / 2;
   const matrix = omino.map(
     row => row.map(

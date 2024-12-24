@@ -23,6 +23,7 @@ const state = {
     [0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0],
   ], // but with rowCount and columnCount
+  paused: false,
 };
 
 let tetris;
