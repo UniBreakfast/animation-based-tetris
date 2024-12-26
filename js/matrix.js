@@ -1,4 +1,4 @@
-export { makeMatrix, getMatrixStats };
+export { makeMatrix, getMatrixStats, rotateMatrixClockwise };
 
 function makeMatrix(rowCount, columnCount) {
   return Array.from(
@@ -7,9 +7,6 @@ function makeMatrix(rowCount, columnCount) {
   );
 }
 
-/* const {
-      count, width, height, startRow, endRow, startCol, endCol
-    } = getMatrixStats(shape); */
 function getMatrixStats(matrix) {
   const height = matrix.length;
   const width = matrix[0].length;
@@ -32,4 +29,18 @@ function getMatrixStats(matrix) {
   }
 
   return { count, width, height, startRow, endRow, startCol, endCol };
+}
+
+function rotateMatrixClockwise(matrix) {
+  const height = matrix.length;
+  const width = matrix[0].length;
+  const rotatedMatrix = makeMatrix(width, height);
+  
+  for (let i = 0; i < height; i++) {
+    for (let j = 0; j < width; j++) {
+      rotatedMatrix[j][height - 1 - i] = matrix[i][j];
+    }
+  }
+  
+  return rotatedMatrix;
 }

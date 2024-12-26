@@ -5,6 +5,7 @@ import { makeMatrix } from './matrix.js';
 const state = {
   row: 0, // posion of the top-left corner of the
   column: 2, // current omino relative to the grid
+  turn: 0, // number or times the omino has been rotated
   omino: [ // like this one
     [0, 1, 0],
     [0, 1, 0],

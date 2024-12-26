@@ -1,6 +1,5 @@
 export { prepareConfig };
 
-  import { colorDict } from './ominos.js';
 import { shuffle } from './random.js';
 
 const config = {
@@ -9,8 +8,11 @@ const config = {
   blockSize: 10, // example value, updated by glass
   lineWidthRatio: 1/25,
   lineWidth: 1, // example value, updated by glass
+  lineColor: '#bbb',
   startTime: 1734960490238, // example value, updated on start
   stepDuration: 500,
+  // stepDuration: 1000,
+  // stepDuration: 4000,
   colorDict: {1: 'red', 2: 'blue'}, // example value, updated by prepareConfig
 };
 

@@ -1,62 +1,99 @@
 export { prepareAnimate };
 
+import { getMatrixStats } from './matrix.js';
+
 let config;
 
 function prepareAnimate(configRef, state, glass, teaser) {
   config = configRef;
 
-  let { startTime, stepDuration} = config;
-  let stepStartTime = startTime;
-  let stepEndTime = startTime + stepDuration;
-  let stepProgress = 0;
-  let rowActual = state.row;
-  let columnActual = state.column;
-  let turnActual = 0;
-  let rowNext = state.row + 1;
-  let columnNext = state.column;
-  let turnNext = 0;
+  let { startTime, stepDuration } = config;
+  let { omino, row, column, turn } = state;
+  let { startRow, endRow } = getMatrixStats(omino);
   let lastTime = startTime;
+  let stepStartTime = startTime;
+  let leftTime = stepDuration;
+  let stepEndTime = startTime + stepDuration;
+  let deltaTime = 0;
+  let stepProgress = 0;
+  let rowPrevious = row - (endRow - startRow + 1);
+  let rowActual = rowPrevious;
+  let rowNext = row;
+  let rowShift = 0;
+  let columnPrevious = column;
+  let columnActual = column;
+  let columnNext = column;
+  let columnShift = 0;
+  let turnPrevious = 0;
+  let turnActual = 0;
+  let turnNext = 0;
+  let turnShift = 0;
   let frameRequestId;
 
   Object.assign(animate, { pause, resume });
-  
+
   return animate;
 
   function animate(now) {
     const { stepDuration } = config;
-    
-    stepProgress = (now - stepStartTime) / stepDuration;
-    lastTime = now;
 
-    if (now >= stepEndTime) {
-      stepProgress--;
-      state.row = rowActual = rowNext;
-      rowNext++;
+    if (now < stepEndTime) {
+      deltaTime = now - lastTime;
+      leftTime = stepEndTime - lastTime;
+
+    } else {
+      // return pause();
+      deltaTime = now - stepEndTime;
       stepStartTime = stepEndTime;
-      stepEndTime += stepDuration;
+      stepEndTime = stepStartTime + stepDuration;
+      leftTime = stepDuration;
+      rowActual = rowNext;
+      columnActual = columnNext;
+      turnActual = turnNext;
+      rowPrevious = rowNext;
+      columnPrevious = columnNext;
+      turnPrevious = turnNext;
+      rowNext++;
+      state.row = rowNext;
     }
 
-    const { omino, row, column } = state;
-    const rowShift = stepProgress;
+    ({
+      omino,
+      row, row: rowNext,
+      column, column: columnNext,
+      turn, turn: turnNext
+    } = state);
+
+    rowShift = deltaTime / leftTime * (rowNext - rowActual);
+    columnShift = deltaTime / leftTime * (columnNext - columnActual);
+    turnShift = deltaTime / leftTime * (turnNext - turnActual);
+
+    rowActual += rowShift;
+    columnActual += columnShift;
+    turnActual += turnShift;
 
     glass.clear();
-    glass.drawOmino(omino, row, column, rowShift, 0, 0);
+    glass.drawGrid();
+    glass.drawOmino(omino, rowActual, columnActual, turnActual - turn);
+    lastTime = now;
 
     frameRequestId = requestAnimationFrame(animate);
   }
 
   function pause() {
     state.paused = true;
+    stepProgress = (lastTime - stepStartTime) / stepDuration;
 
     cancelAnimationFrame(frameRequestId);
   }
 
   function resume() {
     const now = performance.now();
-    
+
     state.paused = false;
     stepStartTime = now - stepProgress * stepDuration;
     stepEndTime = stepStartTime + stepDuration;
+    lastTime = now;
 
     animate(now);
   }

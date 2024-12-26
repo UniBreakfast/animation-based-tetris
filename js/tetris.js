@@ -1,7 +1,7 @@
 export { tetris };
 
 import { getRandomItem } from './random.js';
-import { getMatrixStats } from './matrix.js';
+import { getMatrixStats, rotateMatrixClockwise } from './matrix.js';
 import {
   ominoDict, ominoRegistry,
   commonOminos, uncommonOminos,
@@ -10,6 +10,7 @@ import {
 const tetris = {
   getSomeOmino,
   chooseDropPosition,
+  canMove, canRotate, rotate,
 };
 
 function getSomeOmino() {
@@ -26,4 +27,16 @@ function chooseDropPosition(omino, columnCount) {
   const column = round((columnCount - width) / 2 - startCol);
 
   return { row, column };
+}
+
+function canMove(action) {
+  return true;
+}
+
+function canRotate() {
+  return true;
+}
+
+function rotate(omino) {
+  return rotateMatrixClockwise(omino);
 }

@@ -36,3 +36,5 @@
   - exact filler bonuses, height bonuses, emptiness below bonuses
   - premonition (next X ominos)
   - random changes (in color, holes, position)
+  - visual drop targeting
+  
