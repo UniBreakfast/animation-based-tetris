@@ -2,7 +2,7 @@ export { enableKeyboardControl };
 
 import { tetris } from './tetris.js';
 
-let state;
+let state, config;
 
 const keyActionMap = {
   ArrowUp: 'rotate',
@@ -28,7 +28,10 @@ const shifts = {
   down: { row: 1, column: 0 },
 }
 
-function enableKeyboardControl(stateRef, { pause, resume }) {
+function enableKeyboardControl(
+  configRef, stateRef, { pause, resume }
+) {
+  config = configRef;
   state = stateRef;
 
   onkeydown = ({ code }) => {
@@ -44,7 +47,14 @@ function enableKeyboardControl(stateRef, { pause, resume }) {
         return pause();
       }
 
-      if (moveActions.includes(action) && tetris.canMove(action)) {
+      if (moveActions.includes(action) && tetris.canMove(
+        action,
+        state.omino,
+        state.row,
+        state.column,
+        config.columnCount,
+        config.rowCount
+      )) {
         const { row, column } = shifts[action];
 
         state.row += row;

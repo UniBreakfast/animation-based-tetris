@@ -1,4 +1,6 @@
-export { makeMatrix, getMatrixStats, rotateMatrixClockwise };
+export {
+  makeMatrix, getMatrixStats, rotateMatrixClockwise, mergeMatrices,
+};
 
 function makeMatrix(rowCount, columnCount) {
   return Array.from(
@@ -35,12 +37,22 @@ function rotateMatrixClockwise(matrix) {
   const height = matrix.length;
   const width = matrix[0].length;
   const rotatedMatrix = makeMatrix(width, height);
-  
+
   for (let i = 0; i < height; i++) {
     for (let j = 0; j < width; j++) {
       rotatedMatrix[j][height - 1 - i] = matrix[i][j];
     }
   }
-  
+
   return rotatedMatrix;
+}
+
+function mergeMatrices(targetMatrix, sourceMatrix, row, column) {
+  for (let i = 0; i < sourceMatrix.length; i++) {
+    for (let j = 0; j < sourceMatrix[0].length; j++) {
+      if (sourceMatrix[i][j]) {
+        targetMatrix[row + i][column + j] = sourceMatrix[i][j];
+      }
+    }
+  }
 }

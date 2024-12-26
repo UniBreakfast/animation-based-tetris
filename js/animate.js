@@ -1,6 +1,7 @@
 export { prepareAnimate };
 
-import { getMatrixStats } from './matrix.js';
+import { getMatrixStats, mergeMatrices } from './matrix.js';
+import { tetris } from './tetris.js';
 
 let config;
 
@@ -8,7 +9,7 @@ function prepareAnimate(configRef, state, glass, teaser) {
   config = configRef;
 
   let { startTime, stepDuration } = config;
-  let { omino, row, column, turn } = state;
+  let { omino, row, column, turn, grid } = state;
   let { startRow, endRow } = getMatrixStats(omino);
   let lastTime = startTime;
   let stepStartTime = startTime;
@@ -53,7 +54,32 @@ function prepareAnimate(configRef, state, glass, teaser) {
       rowPrevious = rowNext;
       columnPrevious = columnNext;
       turnPrevious = turnNext;
-      rowNext++;
+      if (tetris.canMove(
+        'down', 
+        omino, 
+        rowNext, 
+        columnNext, 
+        config.columnCount, 
+        config.rowCount
+      )) {
+        rowNext++;
+      } else {
+        mergeMatrices(state.grid, omino, rowNext, columnNext);
+        omino = state.next;
+        
+        const next = tetris.getSomeOmino();
+        const { startRow, endRow } = getMatrixStats(omino);
+        const { row, column } = tetris.chooseDropPosition(
+          omino, config.columnCount
+        );
+
+        rowNext = row;
+        columnNext = columnPrevious = columnActual = column;
+        turnNext = turnPrevious = turnActual = turn = 0;
+        rowActual = rowPrevious = rowNext - (endRow - startRow + 1);
+
+        Object.assign(state, { omino, row, column, turn, next });
+      }
       state.row = rowNext;
     }
 
@@ -73,7 +99,7 @@ function prepareAnimate(configRef, state, glass, teaser) {
     turnActual += turnShift;
 
     glass.clear();
-    glass.drawGrid();
+    glass.drawGrid(grid);
     glass.drawOmino(omino, rowActual, columnActual, turnActual - turn);
     lastTime = now;
 

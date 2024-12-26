@@ -29,8 +29,13 @@ function chooseDropPosition(omino, columnCount) {
   return { row, column };
 }
 
-function canMove(action) {
-  return true;
+function canMove(action, omino, row, column, columnCount, rowCount) {
+  const { startRow, endRow, startCol, endCol } = getMatrixStats(omino);
+
+  if (action === 'left') return column > -startCol;
+  if (action === 'right') return column < columnCount - 1 - endCol;
+  if (action === 'up') return row > startRow;
+  if (action === 'down') return row < rowCount - endRow - 1;
 }
 
 function canRotate() {

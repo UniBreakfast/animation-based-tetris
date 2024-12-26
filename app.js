@@ -22,12 +22,12 @@ expose({ config, state, glass, teaser });
 
 function start() {
   const now = performance.now();
-  
+
   config.startTime = now;
   
   animate = prepareAnimate(config, state, glass, teaser);
 
-  enableKeyboardControl(state, {pause, resume});
+  enableKeyboardControl(config, state, {pause, resume});
 
   animate(now);
 }

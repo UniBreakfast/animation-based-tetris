@@ -39,8 +39,13 @@ function clear() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function drawGrid() {
-  const { blockSize } = config;
+function drawGrid(grid) {
+  const { blockSize, lineWidth, colorDict } = config;
+  const matrix = grid.map(
+    row => row.map(
+      i => i && ({bg: colorDict[i], fg: colorDict.line})
+    )
+  );
 
   ctx.strokeStyle = config.lineColor;
 
@@ -49,6 +54,8 @@ function drawGrid() {
       ctx.strokeRect(j, i, blockSize, blockSize);
     }
   }
+
+  drawSquareMatrix(ctx, matrix, 0, 0, blockSize, lineWidth, 0);
 }
 
 function drawOmino(omino, row, column, turn) {
